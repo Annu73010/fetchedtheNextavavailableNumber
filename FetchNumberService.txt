@@ -1,0 +1,18 @@
+package net.codejava.service;
+
+import java.util.List;
+
+import net.codejava.entity.FetchNumberEntity;
+
+public interface FetchNumberService {
+
+	FetchNumberEntity saveEntity(FetchNumberEntity fetch);
+
+	List<FetchNumberEntity> getAll();
+
+	FetchNumberEntity getByCode(Integer code);
+
+	void deleteRecord(Integer code);
+
+	
+}
