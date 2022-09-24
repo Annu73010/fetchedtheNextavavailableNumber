@@ -1,0 +1,101 @@
+package net.codejava.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import net.codejava.entity.FetchNumberEntity;
+import net.codejava.service.FetchNumberService;
+
+@RestController
+@RequestMapping("/fetchNumber")
+public class ApiController {
+
+	@Autowired
+	private JdbcTemplate jdbcTemplateObject;
+	
+	@Autowired
+	FetchNumberService service;
+	
+	@PostMapping("/save")
+//	To save the record 
+	public ResponseEntity<FetchNumberEntity> save(@RequestBody FetchNumberEntity fetch){
+		FetchNumberEntity saved = service.saveEntity(fetch);
+		return new ResponseEntity<>(saved,HttpStatus.OK);
+	}
+	
+	@GetMapping("/all")
+//	For getting all records
+	public ResponseEntity<List<FetchNumberEntity>> getAll(){
+		List<FetchNumberEntity> allfetched = service.getAll();
+		return new ResponseEntity<>(allfetched,HttpStatus.OK);
+	}
+	
+	@GetMapping("/categorycode/{category_code}")
+//	For getting the record by category code
+	public ResponseEntity<FetchNumberEntity> getValueByCategoryCode(@PathVariable ("category_code") Integer code){
+		FetchNumberEntity fetched = service.getByCode(code);
+		int required = fetched.getNum_value();
+		System.out.println(required);
+		return new ResponseEntity<>(fetched,HttpStatus.OK);
+	}
+	
+	@PutMapping("/update/{category_code}")
+	public ResponseEntity<FetchNumberEntity> getValue(@PathVariable("category_code") Integer code){
+		
+//		Fetching the value from Category_code
+		FetchNumberEntity fetched = service.getByCode(code);
+		int required = fetched.getNum_value();
+		for(int i=required + 1; i>9; i++) {
+			int num = i ;
+			int sum = 0;
+			while(num>0 || sum>9) {
+				if(num == 0) {
+					num = sum;
+					sum = 0;
+				}
+				sum += num%10;
+				num /=10;
+			}
+			
+			if(sum == 1)
+			{
+//				set the "value" to be used in later
+				fetched.setNum_value(i);
+				
+				String updateQuery = "update record1 set num_value = ? where category_code = ?" ; 
+//				Store the updated value to corresponding category code
+				jdbcTemplateObject.update(updateQuery,fetched.getNum_value(),code);
+//				Fetching the record with with category code
+				FetchNumberEntity fetched2 = service.getByCode(code);
+				try {
+					Thread.sleep(5000);
+				}
+				catch(InterruptedException ex) {
+					ex.printStackTrace();
+				}
+				return new ResponseEntity<>(fetched2,HttpStatus.OK);
+				
+			}
+		}
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	@DeleteMapping("/categorycode/{category_code}")
+//	To delete the record by category Code
+	public ResponseEntity<Void> delete(@PathVariable("category_code")  Integer code){
+		 service.deleteRecord(code);
+		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
+
+}
