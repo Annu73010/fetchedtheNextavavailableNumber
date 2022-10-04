@@ -1,0 +1,190 @@
+package com.bank.account.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.bank.account.entity.CollegeEntity;
+import com.bank.account.repository.CollegeRepo;
+
+@Service
+public class CollegeServiceImpl implements CollegeService{
+
+	@Autowired
+	CollegeRepo repo;
+	
+	@Override
+	public CollegeEntity saveCollege(CollegeEntity clg) {
+		return repo.save(clg);
+	}
+
+	@Override
+	public List<CollegeEntity> getList() {
+		return repo.findAll();
+	}
+
+	@Override
+	public List<CollegeEntity> getListByCourse(String coursename) {
+		return repo.findByCoursename(coursename);
+	}
+	
+}
+
+
+
+
+
+
+
+package com.bank.account.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.bank.account.entity.CollegeEntity;
+
+@Service
+public interface CollegeService {
+	
+	public CollegeEntity saveCollege(CollegeEntity clg);
+
+	public List<CollegeEntity> getList();
+
+	public List<CollegeEntity> getListByCourse(String coursename);
+	
+}
+
+
+
+
+package com.bank.account.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="college")
+public class CollegeEntity {
+	
+	public int getCollegecode() {
+		return collegecode;
+	}
+	public void setCollegecode(int collegecode) {
+		this.collegecode = collegecode;
+	}
+	public String getCoursename() {
+		return coursename;
+	}
+	public void setCoursename(String coursename) {
+		this.coursename = coursename;
+	}
+	public int getCoursefee() {
+		return coursefee;
+	}
+	public void setCoursefee(int coursefee) {
+		this.coursefee = coursefee;
+	}
+	public int getCourseduration_years() {
+		return courseduration_years;
+	}
+	public void setCourseduration_years(int courseduration_years) {
+		this.courseduration_years = courseduration_years;
+	}
+	public String getAccommodation() {
+		return accommodation;
+	}
+	public void setAccommodation(String accommodation) {
+		this.accommodation = accommodation;
+	}
+	public int getAccommodation_fee() {
+		return accommodation_fee;
+	}
+	public void setAccommodation_fee(int accommodation_fee) {
+		this.accommodation_fee = accommodation_fee;
+	}
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private int collegecode;
+	private String coursename;
+	private int coursefee;
+	private int courseduration_years;
+	private String accommodation;
+	private int accommodation_fee;
+	
+	
+}
+
+
+
+
+package com.bank.account.controller;
+
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.bank.account.entity.CollegeEntity;
+import com.bank.account.service.CollegeService;
+
+@RestController
+@RequestMapping("/college")
+public class CollegeController {
+
+	@Autowired
+	CollegeService service;
+	
+	@PostMapping("/save")
+	public ResponseEntity<CollegeEntity> save(@RequestBody CollegeEntity clg){
+		CollegeEntity savedclg = service.saveCollege(clg);
+		return new ResponseEntity<>(savedclg,HttpStatus.OK);
+	}
+	
+	@GetMapping("/list")
+	public ResponseEntity<List<CollegeEntity>> listOfCollege(){
+		List<CollegeEntity> listofclg = service.getList();
+		return new ResponseEntity<>(listofclg,HttpStatus.OK);
+	}
+	
+	@GetMapping("/coursename/{coursename}")
+	public ResponseEntity<List<CollegeEntity>> getByCourseName(@PathVariable("coursename") String coursename){
+		List<CollegeEntity> list = service.getListByCourse(coursename);
+		return new ResponseEntity<>(list,HttpStatus.OK);
+	}
+	
+}
+
+
+
+package com.bank.account.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.bank.account.entity.CollegeEntity;
+
+@Repository
+public interface CollegeRepo extends JpaRepository<CollegeEntity,Integer>{
+	public List<CollegeEntity> findByCoursename(String coursename);
+}
+
+
+
+server.port:8093
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521:xe
+spring.datasource.username=_
+spring.datasource.password=_
+spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
